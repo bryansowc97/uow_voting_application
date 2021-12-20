@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title%}Account detail{% endblock %}
+{%block content %}
+    {% if user.is_authenticated %}
+        <p>{{ user.first_name }}'s Account Details.</p>
+        <p>Account ID: {{ user.user_id }}</p>
+        <label for "username">First Name: </label>
+        <input type = "text" value = {{ user.username }} name = "username"></input></br>
+        <label for "fname">First Name: </label>
+        <input type = "text" value = {{ user.first_name }} name = "fname"></input></br>
+        <label for "lname">Last Name: </label>
+        <input type = "text" value = {{ user.last_name }} name = "lname"></input></br>
+        <label for "email">Email: </label>
+        <input type = "text" value = {{ user.email }} name = "email"></input>
+    {% else %}
+        <p>Login<a href ="/login">Here</a></p> 
+    {% endif %}
+{% endblock %}

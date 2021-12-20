@@ -1,0 +1,38 @@
+{% extends "base.html"%}
+
+{% block title%}Manage Account{% endblock %}
+
+{% block content %}
+    <div>
+        <h1>List of user's account</h1>
+        <ul id = "display-data">
+        </ul>
+    </div>
+
+{% endblock%}
+
+{% block javascript%}
+<script>
+    $(document).ready(function(){
+        $.ajax({
+            type:'GET',
+            url: 'get_user/',
+            success: function(response){
+                console.log(response);
+                $("#display-data").empty();
+                for (var key in response.all_user)
+                {
+                    var temp = "<li>"+response.all_user[key].first_name+"</li>"
+                    $("#display-data").append(temp);
+                }
+            },
+            error: function(response){
+                alert("An Error Occured");
+            }
+        })
+    })
+</script>
+{% endblock %}
+
+
+
