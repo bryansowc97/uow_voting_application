@@ -1,0 +1,26 @@
+{% load crispy_forms_tags %}
+
+<form method ="post" action = "update_poll/{{form.instance.poll_id}}" data-url= "{% url 'update_poll' form.instance.poll_id %}" class="update-form">
+    {% csrf_token %}
+    <div class="modal-header">
+        <h5 class="modal-title">Update Poll</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <div class="modal-body">
+                {{form|crispy}}
+
+                {% for polloption in poll_option%}
+                <div id = "optionform-container" class = "form-group">
+                    <div id = "optionDiv">
+                        <label for ="optionname">Option {{forloop.counter}}*</label></br>
+                        <input type = "text" id = "option" name = "option" class = "form-control" value = "{{polloption}}" ></br>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+    </div>
+</form>

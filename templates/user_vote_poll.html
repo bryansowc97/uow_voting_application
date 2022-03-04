@@ -1,0 +1,253 @@
+{% extends "base.html"%}
+
+{% block title%}Voting Poll{% endblock %}
+
+{% block styles %}
+<style>
+  .card{
+    margin:auto;
+    width:50%;%
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  {% csrf_token %}
+
+    <div class = "card">
+      <div class = "card-header">
+          <h1>{{poll.poll_name}}</h1>
+      </div>
+      <div class ="card-body">
+        <div>
+          <label for ="polldescription" style = "display: block; margin: 0 auto; width:75%;"><Strong>Poll's Description</strong></label></br>
+          <textarea rows = "10" cols = "50" readonly type = "text" style = "display: block; margin: 0 auto; width:75%;">{{poll.description}}</textarea>
+        </div>
+        </br>
+        <div>
+          <button type="button" id = "demoButton"class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter" 
+          style = "display: block; margin: 0 auto; width:25%; padding:10px;">
+            Vote
+          </button>
+        </div>
+      </div>
+
+    {% if user_receipt %}
+      <div class="modal fade" id="votingModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content" style = "width: 750px;">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Vote Option</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>You have already voted on this poll.</p>
+              <p>Your receipt: {{user_receipt}}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">OK</button>
+            <button type="button" id = "votingcancelButton" class="btn btn-secondary" data-dismiss="modal">Cancel</button>  
+          </div>
+        </div>
+      </div>
+
+    {% else %}
+      <div class="modal fade" id="votingModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Vote Option</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id = "votingForm">
+                <label for ="options">Select Option:</label>
+                <select name= "options">
+                {% for polloption in polloptions%}
+                    <option value ="{{polloption.option_num}}">{{polloption.option_name}}</option>
+                {% endfor %}
+                </select>
+              </div>
+                <div class="modal-footer">
+                  <button type="button" id = "voteButton" data-url = "{% url 'vote_menu' poll.poll_id %}" class="btn btn-primary">Vote</button>
+                  <button type="button" id = "votingcancelButton" class="btn btn-secondary" data-dismiss="modal">Cancel</button>  
+                </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="modal fade" id="voteReceiptModal" style = "width: 100%;" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style = "width: 750px; height: 250px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="voteDecryptModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Confirm Decrypt?</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Decrypting of Receipt Number will result in the ticket being invalid after decryption! Click "OK!" to proceed.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id = "confirmDecryptButton" data-url = "{% url 'decrypt_menu' poll.poll_id %}" class="btn btn-primary">OK</button>
+            <button type="button" id = "voteDecryptcancelButton" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="voteDecryptedModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style = "width: 750px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Confirm Vote?</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>You can only vote once, once submitted you cannot change your vote for this poll.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" id = "confirmButton" data-url = "{% url 'confirm_vote' poll.poll_id %}" class="btn btn-primary">Confirm Vote</button>
+              <button type="button" id = "cancelButton" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
+{% endblock%}
+
+{% block javascript %}
+<script>
+
+  $(document).ready(function(){
+
+  
+    $("#demoButton").click(function(){
+        $('#votingModal').modal('show');
+    })
+
+    $(".close").click(function(){
+        $('#exampleModalCenter').modal('hide');
+    })
+
+    $("#cancelButton").click(function(){
+        $('#exampleModalCenter').modal('hide');
+    })
+
+    $("#votingcancelButton").click(function(){
+      $('#votingModal').modal('hide');
+    })
+
+    $(document).on("click", "#votingReceiptcancelButton", function(){
+      $('#voteReceiptModal').modal('hide');
+    })
+
+    $(document).on("click", ".decryptcancelButton", function(){
+      $('#voteDecryptedModal').modal('hide');
+    })
+
+    $("#voteDecryptcancelButton").click(function(){
+      $('#voteDecryptModal').modal('hide');
+    })
+
+    $("#voteButton").click(function(){
+      $('#voteReceiptModal').modal('show');
+    })
+
+    $(document).on("click", "#decryptButton", function(){
+      $('#voteDecryptModal').modal('show');
+    })
+
+    $("#confirmDecryptButton").click(function(){
+      $('#voteDecryptedModal').modal('show');
+      $('#voteDecryptModal').modal('hide');
+      $('#voteReceiptModal').modal('hide');
+    })
+
+    $("#confirmButton").click(function(){
+        var btn = $(this);
+        var receipt = $("#receiptNum").text();
+
+        $.ajax({
+          url: btn.attr("data-url"),
+          type: "post",
+          data:{
+            receipt: receipt,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          dataType:"json",
+          success: function(response){
+            window.location.href = "/user_view_poll/";
+          }
+        })
+    })
+
+    $(document).on("click", "#confirmVoteButton", function(){
+      $('#exampleModalCenter').modal('show');
+    })
+
+    $("#confirmDecryptButton").click(function(){
+
+      var btn = $(this);
+      var receipt_list = [];
+
+      $(".receiptNum").each(function(i, e){
+        receipt_list.push($(e).text());
+      })
+      
+      $.ajax({
+        url: btn.attr("data-url"),
+        type: "post",
+        data:{
+          receipt_list: receipt_list,
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        dataType:"json",
+        success: function(data){
+          $("#voteDecryptedModal .modal-content").html(data);
+        }
+      })
+    })
+
+    $("#voteButton").click(function(){
+      var btn = $(this);
+      var form = $("#votingForm").serializeArray();
+      $.ajax({
+        url: btn.attr("data-url"),
+        type: "post",
+        data:{
+          form: form,
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        dataType: "json",
+        success: function(data){
+          $("#voteReceiptModal .modal-content").html(data);
+        }
+      });
+    })
+  })
+
+</script>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html"%}
+
+{% block title%}Manage Account{% endblock %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+    
+    {% if user.is_superuser %}
+        <div>
+            <h1>{{obj.poll_name}}</h1>
+            <table id = "display-data">
+                <tr>
+                    <th>Option ID</th>
+                    <th>Option Number</th>
+                    <th>Option Name</th>
+                </tr>
+                {% for options in obj.polloptions_set.all%}
+                    <tr>
+                        <td>{{options.option_id}}</td>
+                        <td>{{options.option_num}}</td>
+                        <td>{{options.option_name}}</td>
+                    </tr>
+                {% endfor %}
+                
+            </table>
+        </div>
+
+        <div class="modal fade" id="modal-user">
+            <div class="modal-dialog">
+              <div class="modal-content"></div>
+            </div>
+        </div>
+
+    {% else %}
+        <div>
+            <p>You have no access</p>
+        </div>
+    {% endif %}
+{% endblock%}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Voting Website{% endblock %}
+
+{% block styles %}
+<style>
+    .card{
+        margin:auto;
+        width:50%;
+    }
+    
+    .message{
+        color:red;
+    }
+
+</style>
+{% endblock%}
+
+{% block content %}
+    <div class = "card">
+        <div class = "card-header">
+            Login
+        </div>
+        <div class = "card-body">
+            <form method ="POST" class ="form-group">
+                {% csrf_token %}
+                <p class ="message">{{message}}</p>
+                {{form|crispy}}
+
+                <button type ="submit" class ="btn btn-success" style ="cursor: pointer;">Login</button>
+            </form>
+            <p>No account? Make one <a href ="/register">here</a></p>
+            <a href = "/reset_password_page">Forgot password?</a>
+        </div>
+    </div>
+{% endblock %}

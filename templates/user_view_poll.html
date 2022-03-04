@@ -1,0 +1,98 @@
+{% extends "base.html"%}
+{% load index %}
+
+{% block title%}View Poll{% endblock %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+    <div>
+        <h1>List of invited polls</h1>
+        <table id = "display-data" class = "table table-striped">
+            <tr>
+                <th>Poll ID</th>
+                <th>Poll name</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th></th>
+            </tr>
+
+            {% for poll in currentuserpoll%}
+                <tr>
+                    <td>{{poll.poll_id.poll_id}}</td>
+                    <td>{{poll.poll_id.poll_name}}</td>
+                    <td class = "pollstatus">{{poll.poll_id.poll_status}}</td>
+                    <td>
+                        <span class = "progresscount">{{uservotedlist|index:forloop.counter0}}</span>
+                        <span>/</span>
+                        <span class = "totalprogresscount">{{userpolllist|index:forloop.counter0}}</span>
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                25%
+                            </div>
+                          </div>
+                    </td>
+                    <td>
+                        {% if poll.poll_id.poll_status == "2" %}
+                        <a href = "{{poll.poll_id.poll_id}}/view_result/">
+                            <button class="btn btn-primary">Show Result</button>
+                        </a>
+                        {% else %}
+                        <a href = "{{poll.poll_id.poll_id}}/vote/">
+                            <button class="btn btn-primary">Vote</button>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="modal fade" id="modal-user">
+        <div class="modal-dialog">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+
+{% endblock%}
+
+{% block javascript %}
+<script>
+
+    var statuslist = document.getElementsByClassName("pollstatus");
+    var progresslist = document.getElementsByClassName("progresscount");
+    var progressbarlist = document.getElementsByClassName("progress-bar");
+    var totalprogresslist = document.getElementsByClassName("totalprogresscount");
+
+    for (var i = 0; i < progresslist.length; i++){
+
+        progressbarlist[i].ariaValueMax = totalprogresslist[i].innerHTML;
+        progressbarlist[i].ariaValueNow = progresslist[i].innerHTML;
+
+        var percentage = Math.floor(progresslist[i].innerHTML/totalprogresslist[i].innerHTML * 100);
+
+        if (isNaN(percentage)){
+            progressbarlist[i].innerHTML = "0%";
+            progressbarlist[i].style.width = "0%";
+        }
+        else{
+            progressbarlist[i].innerHTML = percentage + "%";
+            progressbarlist[i].style.width = percentage + "%";
+
+        }
+    }
+
+    for (var i = 0; i < statuslist.length; i++){
+
+        if (statuslist[i].innerHTML == "1"){
+            statuslist[i].innerHTML = "Ongoing";
+        }
+
+        else{
+            statuslist[i].innerHTML = "Closed";
+        }
+    }
+
+</script>
+{% endblock %}

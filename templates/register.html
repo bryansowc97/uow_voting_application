@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title%}Create an Account{% endblock %}
+
+{% block styles %}
+<style>
+.invalid_feedback {
+    color:red;
+}
+
+.email_invalid_feedback {
+    color:red;
+}
+
+.password_invalid_feedback{
+    color:red;
+}
+
+.card{
+    margin:auto;
+    width:50%;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+    <div class = "card">
+        <div class = "card-header">
+            Register
+        </div>
+        <div class = "card-body">
+            <div>
+                <div class ="invalid_feedback invalid feed-back" style ="display:none";></div>
+                <div class ="email_invalid_feedback invalid feed-back" style ="display:none";></div>
+                <div class ="password_invalid_feedback invalid feed-back" style ="display:none";></div>
+            </div>
+            <div>
+                <form method ="post" action ="{% url 'register' %}"class ="form-group">
+                    {% csrf_token %}
+                    {{form|crispy}}
+                    <button type ="submit" class ="btn btn-success" id = "submitBtn" style= "cursor: pointer;">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+<script>
+    const id_username = document.querySelector("#id_username");
+    const id_email = document.querySelector("#id_email");
+    const id_password2 = document.querySelector("#id_password2");
+    const feedbackArea = document.querySelector(".invalid_feedback");
+    const emailFeedbackarea = document.querySelector(".email_invalid_feedback");
+    const passwordFeedbackarea = document.querySelector(".password_invalid_feedback");
+
+    id_username.addEventListener("keyup", (e) =>{
+
+        const usernameVal = e.target.value;
+        feedbackArea.style.display = "none";
+        id_username.classList.remove("is-invalid");
+
+
+        if (usernameVal.length > 0){
+
+            fetch("validate_username/",{
+                body: JSON.stringify({username: usernameVal}),
+                method: "post",
+            }).then(res=>res.json()).then(data=>{
+                console.log("data", data);
+                if (data.username_error){
+                    id_username.classList.add("is-invalid");
+                    feedbackArea.style.display = "block";
+                    feedbackArea.innerHTML = data.username_error;
+                    submitBtn.disabled = true;
+                }
+                else{
+                    submitBtn.removeAttribute("disabled");
+                }
+            });
+        }
+    });
+
+    id_email.addEventListener("keyup", (e) =>{
+
+        const emailVal = e.target.value;
+        emailFeedbackarea.style.display = "none";
+        id_email.classList.remove("is-invalid");
+
+        if (emailVal.length > 0){
+
+            fetch("validate_email/",{
+                body: JSON.stringify({email: emailVal}),
+                method: "post",
+            }).then(res=>res.json()).then(data=>{
+                console.log("data", data);
+                if (data.email_error){
+                    id_email.classList.add("is-invalid");
+                    emailFeedbackarea.style.display = "block";
+                    emailFeedbackarea.innerHTML = data.email_error;
+                    submitBtn.disabled = true;
+                }
+                else{
+                    submitBtn.removeAttribute("disabled");
+                }
+            });
+        }
+    });
+
+    $("#id_password2").keyup(function(){
+        var password1 = $("#id_password1").val();
+        var password2 = $("#id_password2").val();
+
+        id_password2.classList.remove("is-invalid");
+
+        if (password2.length > 0){
+            if (password1 != password2){
+                id_password2.classList.add("is-invalid");
+                passwordFeedbackarea.style.display = "block";
+                passwordFeedbackarea.innerHTML = "Password do not match!";
+                submitBtn.disabled = true;
+    
+            }
+            else{
+                passwordFeedbackarea.style.display = "none";
+                submitBtn.removeAttribute("disabled");
+            }
+        }
+    });
+
+</script>
+
+{% endblock %}
