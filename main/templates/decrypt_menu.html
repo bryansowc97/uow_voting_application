@@ -1,0 +1,14 @@
+<div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLongTitle">Decrypted Receipt</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <p>Receipt Number: {{ receipt }}</p>
+    <p>You have voted for: {{ user_choice }}</p>
+</div>
+<div class="modal-footer">
+    <button type="button" id = "confirmButton" class="btn btn-primary decryptcancelButton">OK</button>
+    <button type="button" id = "decryptcancelButton" class="btn btn-secondary decryptcancelButton" data-dismiss="modal">Cancel</button>
+</div>

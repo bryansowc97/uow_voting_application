@@ -1,0 +1,248 @@
+{% extends "base.html"%}
+{% load index %}
+
+{% block title%}Manage Poll{% endblock %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+    {% if user.is_superuser %}
+    
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                <div id = "updateSuccess" class="container-fluid p-0">
+                    <div class="alert-success alert-dismissible" role="alert" >
+                    {{ message }}
+                    <button type="button" id ="closeAlert" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="True">&times;</span>
+                    </button>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+
+        <div>
+            <h1>List of created poll</h1>
+            </br>
+            <button id = "createPoll" class="btn btn-primary" data-url = "{% url 'create_poll' %}">Create New Poll</button>
+            </br></br>
+            <table id = "display-data" class ="table table-striped">
+                <tr>
+                    <th>Poll ID</th>
+                    <th>Poll name</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th></th>
+                </tr>
+                {% for poll in polls %}
+                    <tr>
+                        <td>{{poll.poll_id}}</td>
+                        <td>{{poll.poll_name}}</td>
+                        <td>
+                            <p class = "pollstatus">{{poll.poll_status}}</p>
+                            <button type="button" class="btn btn-danger closeButton" data-bs-dismiss="modal" data-url="{% url 'close_poll' poll.poll_id %}">
+                                Close
+                            </button>
+                        </td>
+                        <td>
+                            <span class = "progresscount">{{uservotedlist|index:forloop.counter0}}</span>
+                            <span>/</span>
+                            <span class = "totalprogresscount">{{userpolllist|index:forloop.counter0}}</span>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                    25%
+                                </div>
+                              </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-warning poll-update" data-url="{% url 'update_poll' poll.poll_id %}">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                                Edit
+                            </button>
+                            <a href = "{{poll.poll_id}}/add_to_poll/">
+                                <button class="btn btn-primary">Invite to poll</button>
+                            </a>
+                            <button type="button" class="btn btn-danger deleteButton" data-bs-dismiss="modal" data-url="{% url 'delete_poll' poll.poll_id %}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="modal fade" id="modal-poll">
+            <div class="modal-dialog">
+              <div class="modal-content">
+              </div>
+            </div>
+        </div>
+
+        <div id="edit-status-modal-poll" class="modal fade" >
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Unable to edit poll</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                        <div class="modal-body">
+                            <p>Unable to edit Ongoing or Closed poll.</p>
+                        </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <div id="delete-close-modal-poll" class="modal fade" >
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id = "poll-delete-close-title" class="modal-title">Delete poll</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                        <div class="modal-body">
+                            <p id = "close_or_delete_text"></p>
+                        </div>
+                    <div class="modal-footer">
+                        <a href = "" class ="btn btn-danger poll_url">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                            Delete
+                        </a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div>
+            <p>You have no access</p>
+        </div>
+    {% endif %}
+{% endblock%}
+
+{% block javascript %}
+<script>
+
+    var statuslist = document.getElementsByClassName("pollstatus");
+    var progresslist = document.getElementsByClassName("progresscount");
+    var progressbarlist = document.getElementsByClassName("progress-bar");
+    var totalprogresslist = document.getElementsByClassName("totalprogresscount");
+
+    for (var i = 0; i < progresslist.length; i++){
+
+        progressbarlist[i].ariaValueMax = totalprogresslist[i].innerHTML;
+        progressbarlist[i].ariaValueNow = progresslist[i].innerHTML;
+
+        var percentage = Math.floor(progresslist[i].innerHTML/totalprogresslist[i].innerHTML * 100);
+
+        if (isNaN(percentage)){
+            progressbarlist[i].innerHTML = "0%";
+            progressbarlist[i].style.width = "0%";
+        }
+        else{
+            progressbarlist[i].innerHTML = percentage + "%";
+            progressbarlist[i].style.width = percentage + "%";
+
+        }
+    }
+
+    for (var i = 0; i < statuslist.length; i++){
+        if (statuslist[i].innerHTML == "0"){
+            statuslist[i].innerHTML = "Inactive";
+        }
+
+        else if(statuslist[i].innerHTML == "1"){
+            statuslist[i].innerHTML = "Ongoing";
+        }
+            
+        else{
+            statuslist[i].innerHTML = "Closed";
+        }
+    }
+
+    $("#createPoll").click(function(){
+        var btn = $(this);
+        $.ajax({
+            type:"get",
+            url: btn.attr("data-url"),
+            dataType: "json",
+            success:function(data){
+                $('#modal-poll .modal-content').html(data);
+                $("#modal-poll").modal("show");
+            }
+        })
+    })
+
+    $(".poll-update").click(function(){
+        var btn = $(this);
+
+        var currentRow = $(this).closest("tr");
+        var statusColumn = currentRow.find(".pollstatus").text();
+
+        if (statusColumn == "Closed" || statusColumn == "Ongoing"){
+            $("#edit-status-modal-poll").modal("show");
+        }
+        else{
+            $.ajax({
+                type:"get",
+                url: btn.attr("data-url"),
+                dataType: "json",
+                success:function(data){
+                    $('#modal-poll .modal-content').html(data);
+                    $("#modal-poll").modal("show");
+                }
+            })
+        }
+    })
+
+    $(".update-form").submit(function(){
+
+        $.ajax({
+            type: "post",
+            url: form.attr("data-url"),
+            data: form.serialize(),
+            dataType: "json",
+            success:function(response){
+            }
+        })
+    })
+
+    $(".deleteButton").click(function(){
+        var msg = "Are you sure? You want to delete this poll?";
+        var btn = $(this);
+        var url = btn.attr("data-url");
+        $(".poll_url").text("Delete");
+        $("#close_or_delete_text").text(msg);
+        $("#poll-delete-close-title").text("Delete Poll");
+        var newUrl = $(".poll_url").attr("href", url);
+        $("#delete-close-modal-poll").modal("show");
+    })
+
+    $(".closeButton").click(function(){
+        var msg = "Are you sure? You want to close this poll?";
+        var btn = $(this);
+        var url = btn.attr("data-url");
+        $(".poll_url").text("Close");
+        $("#poll-delete-close-title").text("Close Poll");
+        $("#close_or_delete_text").text(msg);
+        var newUrl = $(".poll_url").attr("href", url);
+        $("#delete-close-modal-poll").modal("show");
+    })
+
+
+    $(".close").click(function(){
+        $(".p-0").remove()
+    })
+
+</script>
+{% endblock %}
